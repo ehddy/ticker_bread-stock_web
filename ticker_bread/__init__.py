@@ -11,8 +11,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_envvar('APP_CONFIG_FILE')
     # ORM
-    db.init_app(app)
-    migrate.init_app(app, db)
+    # db.init_app(app)
+    # migrate.init_app(app, db)
 
     from . import models
 
