@@ -1,0 +1,91 @@
+/* Screens */
+@import "/static/screens/main.css";
+
+
+
+/* Components */
+@import "/static/components/navi.css";
+@import "/static/components/badge.css";
+@import "/static/components/card.css";
+
+@charset "UTF-8";
+
+:root {
+    --blue: #007bff;
+    --indigo: #6610f2;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #dc3545;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+    --green: #28a745;
+    --teal: #20c997;
+    --cyan: #17a2b8;
+    --white: #fff;
+    --gray: #6c757d;
+    --gray-dark: #343a40;
+    --primary: #007bff;
+    --secondary: #6c757d;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --light: #f8f9fa;
+    --dark: #343a40;
+}
+
+
+* {
+    /* 테두리를 기준으로 크기를 정합니다. */
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+
+}
+
+
+html {
+    font-family: -apple-system,
+        BlinkMacSystemFont,
+        /* 한글 폰트 들어갈 자리 */
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+body {
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+
+}
+
+.main_box {
+    background-color: #F2F5F8;
+    /* border: 0.1px solid rgba(0, 0, 0, .2);
+    border-radius: 10px; */
+    min-height: 100vh;
+}
+
+[role=button] {
+    cursor: pointer;
+}
+
+div.row>div>ul,
+div.row>div>ol {
+    list-style: none;
+    justify-content: end;
+    align-items: center;
+}
+
+a {
+    text-decoration: none
+}
+
+
+small {
+    font-size: 14px;
+}

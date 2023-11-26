@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="row p-2">
+    <div class="col-sm-8">
+        <h1 class="">오늘의 시장</h1>
+    </div>
+    <div class="col-sm-4">
+        <ol class="breadcrumb m-0 p-0">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index')}}">Home</a></li>
+            <li class="breadcrumb-item active">오늘의 시장</li>
+        </ol>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="card-title"><img class="" src="static/img/korea.png" style="height: 20px;"> 코스피
+                    <small>KOSPI</small>
+                </h3>
+                <div class="box-tools float-end"><span class="label label-default">2023/11/03</span></div>
+            </div>
+            <div class="card-body">
+                <div class="market-price">
+                    <span class="up-or-down" "font-size: 18px;">
+                        782.05
+                        <i class="target-icon"></i>
+                        (<span class="percent-change">1.19%</span>, 9.21)
+                        <span class="float-end">
+                            <span class="badge badge-danger up-down">상승:1237</span>&nbsp;
+                            <span class="badge badge-primary up-down">하락:317</span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="card-title"><img class="" src="static/img/korea.png" style="height: 20px;"> 코스닥
+                    <small>KOSDAQ</small>
+                </h3>
+                <div class="box-tools float-end"><span class="label label-default">2023/11/03</span></div>
+            </div>
+            <div class="card-body">
+                <div class="market-price">
+                    <span class="up-or-down" "font-size: 18px;">
+                        -329
+                        <i class="target-icon"></i>
+                        (<span class="percent-change">-1.19%</span>, 9.21)
+                        <span class="float-end">
+                            <span class="badge badge-danger up-down">상승:1237</span>&nbsp;
+                            <span class="badge badge-primary up-down">하락:317</span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 mt-3">
+        <div class="card" style="height: 600px;">
+            <div class="card-body">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mt-3">
+        <div class="card" style="height: 400px;">
+            <div class="card-body">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mt-3">
+        <div class="card" style="height: 400px;">
+            <div class="card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript 코드
+    const priceSpans = document.querySelectorAll(".up-or-down");
+    const target = document.querySelectorAll('.percent-change');
+    const targetIcons = document.querySelectorAll('.target-icon')
+    for (let i = 0; i < priceSpans.length; i++) {
+        const price = parseFloat(priceSpans[i].textContent);
+
+        if (price > 0) {
+            target[i].classList.add('color-up');
+            targetIcons[i].classList.add('fas');
+            targetIcons[i].classList.add('fa-caret-up');
+            targetIcons[i].classList.add('color-up');
+        } else if (price < 0) {
+            target[i].classList.add('color-down');
+            targetIcons[i].classList.add('fas');
+            targetIcons[i].classList.add('fa-caret-down');
+            targetIcons[i].classList.add('color-down');
+
+        }
+
+    }
+
+
+    // var percentChangeElement = document.querySelector('.percent-change');
+
+
+    // if (priceValue > 0 && percentChangeElement) {
+    //     percentChangeElement.classList.add('color-up');
+    // } else if (priceValue < 0 && percentChangeElement) {
+    //     percentChangeElement.classList.add('color-down');
+    // }
+
+</script>
+
+{% endblock %}

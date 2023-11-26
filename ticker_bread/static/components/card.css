@@ -1,0 +1,24 @@
+.color-up {
+    color: #dc3545;
+    font-weight: bolder;
+}
+
+.color-down {
+    color: #007bff;
+    font-weight: bolder;
+}
+
+.card-title {
+    float: left;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0;
+}
+
+.card-header>div>span.label {
+    font-size: 13px;
+}
+
+.market-price {
+    font-size: 18px;
+}
