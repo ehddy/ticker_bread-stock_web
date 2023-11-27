@@ -4,6 +4,8 @@ import psycopg2.extras as extras
 from psycopg2.extras import RealDictCursor
 import yaml 
 
+import numpy as np
+
 import FinanceDataReader as fdr
 
 import requests
