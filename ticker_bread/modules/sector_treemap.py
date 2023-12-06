@@ -1,4 +1,3 @@
-## 테마별 종목 리스트 히트맵
 import yaml
 from sqlalchemy import create_engine
 import pandas as pd
@@ -30,7 +29,7 @@ FROM public.stock_info T1
 LEFT JOIN public.stock_symbols T2
 	ON T1.종목코드 = T2.종목코드
 --WHERE T2.섹터 IS NOT NULL
-LIMIT 50
+--LIMIT 50
 """
 
 df = pd.read_sql(qry, con=engine)
@@ -59,10 +58,10 @@ app.layout = html.Div([
     ], style={'margin-bottom': '20px'}),
 
     html.Label('최소값: '),
-    dcc.Input(id='min-input', type='number', value=100000000),
+    dcc.Input(id='min-input', type='number', value=500000000000),
     
     html.Label('최댓값: '),
-    dcc.Input(id='max-input', type='number', value=1000000000000),
+    dcc.Input(id='max-input', type='number', value=5000000000000),
 
     dcc.Graph(id='treemap')
 ])
@@ -78,10 +77,11 @@ app.layout = html.Div([
 def update_treemap(selected_value, min_value, max_value):
     filtered_df = df[(df['시가총액'] >= min_value) & (df['시가총액'] <= max_value)]
 
-    parents = [''] * len(filtered_df['종목명'])
+    # parents = [''] * len(filtered_df['종목명'])
 
     # path에 '섹터' 추가
-    fig = px.treemap(filtered_df, path=[selected_value, '종목명'], values='시가총액', color='시가총액',
+    # fig = px.treemap(filtered_df, path=['섹터', px.Constant('섹터'), '종목명'], values='시가총액', color='종목명')
+    fig = px.treemap(filtered_df, path=[px.Constant(selected_value), selected_value, '종목명'], values='시가총액', color='시가총액',
                      color_continuous_scale='Viridis', #'RdBu'
                      color_continuous_midpoint=np.average(df['시가총액']),
                      hover_data=['종목명', selected_value, '시가총액']
@@ -91,7 +91,10 @@ def update_treemap(selected_value, min_value, max_value):
                       title=f"{selected_value} 기준 트리맵", height=600
     )
 
+    fig.write_html("/home/ticker_bread/python/ticker_bread/modules/sector_treemap.html")
+
     return fig
+
 
 # 애플리케이션 실행
 if __name__ == '__main__':
