@@ -55,7 +55,7 @@ class Indicators:
         # PostgreSQL 커서 생성
         cur = self.conn.cursor()
 
-        # '시장구분' 칼럼에서 KOSPI, KOSDAQ을 구분하고, '종목코드' 칼럼으로 stock_info 테이블과 join
+        # stock_info, stock_symbols 테이블 join, KOSPI/KOSDAQ 등락률 얻기 (기준일=recent_date일 때)
         cur.execute(f"""
             SELECT s.종목코드, i.등락률
             FROM stock_symbols AS s
@@ -73,7 +73,6 @@ class Indicators:
             elif change < 0:
                 down_count += 1
                 
-        # 결과를 DataFrame으로 변환
         result = pd.DataFrame({
             '상승 종목 수': [up_count],
             '하락 종목 수': [down_count]
