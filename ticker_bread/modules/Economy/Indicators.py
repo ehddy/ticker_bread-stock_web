@@ -1,10 +1,27 @@
 import pandas as pd
-import FinanceDataReader as fdr
+import yaml
+import psycopg2
 import requests as rq
 from bs4 import BeautifulSoup as bs
+import FinanceDataReader as fdr
 
 class Indicators:
     def __init__(self):
+        # db 정보
+        with open('/home/code/stock_git/ticker_bread-stock_web/config/db_info.yml', encoding='UTF-8') as f:
+            _cfg = yaml.load(f, Loader=yaml.FullLoader)
+
+        # PostgreSQL 연결 정보
+        self.conn_info = {
+            "host": _cfg['POSTGRES_HOST'],
+            "database": _cfg['POSTGRES_DB'],
+            "port":"5432",
+            "user": _cfg['POSTGRES_USER'],
+            "password": _cfg['POSTGRES_PASSWORD']
+        }
+
+        # PostgreSQL 연결
+        self.conn = psycopg2.connect(**self.conn_info)
         self.recent_date = self.get_recent_date()
 
     # 최근 장 마감일자 불러오기
@@ -32,15 +49,52 @@ class Indicators:
         df = fdr.DataReader(index, start_date, self.recent_date)
         df = df.asfreq(freq, method='pad')
         return df[['Close']]
+    
+    # 코스피, 코스닥 상승 종목 수, 하락 종목 수 호출
+    def get_up_down_count(self, index):
+        # PostgreSQL 커서 생성
+        cur = self.conn.cursor()
 
-# stock_data = StockData()
+        # '시장구분' 칼럼에서 KOSPI, KOSDAQ을 구분하고, '종목코드' 칼럼으로 stock_info 테이블과 join
+        cur.execute(f"""
+            SELECT s.종목코드, i.등락률
+            FROM stock_symbols AS s
+            JOIN stock_info AS i
+            ON s.종목코드 = i.종목코드
+            WHERE s.시장구분 = '{index}' AND TO_CHAR(i.기준일, 'YYYY/MM/DD') = '{self.recent_date}'
+        """)
 
-# recent_kospi_df = stock_data.get_recent_index_data('KS11')
-# recent_kosdaq_df = stock_data.get_recent_index_data('KQ11')
+        # 등락률이 0보다 크면 상승, 작으면 하락으로 분류
+        up_count = 0
+        down_count = 0
+        for _, change in cur.fetchall():
+            if change > 0:
+                up_count += 1
+            elif change < 0:
+                down_count += 1
+                
+        # 결과를 DataFrame으로 변환
+        result = pd.DataFrame({
+            '상승 종목 수': [up_count],
+            '하락 종목 수': [down_count]
+        })
+
+        return result
+
+
+# indicators = Indicators() # Indicators 인스턴스 생성
+
+# recent_kospi_df = indicators.get_recent_index_data('KS11')
+# recent_kosdaq_df = indicators.get_recent_index_data('KQ11')
 # print(recent_kospi_df)
 # print(recent_kosdaq_df)
 
-# kospi_time_series_df = stock_data.get_index_data_over_time('KS11', '2023-01-01', 'D')
-# kosdaq_time_series_df = stock_data.get_index_data_over_time('KQ11', '2023-01-01', 'D')
+# kospi_time_series_df = indicators.get_index_data_over_time('KS11', '2023-01-01', 'D')
+# kosdaq_time_series_df = indicators.get_index_data_over_time('KQ11', '2023-01-01', 'D')
 # print(kospi_time_series_df)
 # print(kosdaq_time_series_df)
+
+# kospi_updown_df = indicators.get_up_down_count('KOSPI')
+# kosdaq_updown_df = indicators.get_up_down_count('KOSDAQ') 
+# print(kospi_updown_df)
+# print(kosdaq_updown_df)
