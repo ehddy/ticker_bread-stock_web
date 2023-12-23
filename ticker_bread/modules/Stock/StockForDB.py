@@ -31,6 +31,7 @@ class StockForDB:
             billion = int(number / 10**8)
             formatted_billion = "{:,}".format(billion)
             return f"{formatted_billion}억원"
+            
         # 천만원 이상의 경우 천만원 단위로 변환
         elif number >= 10**7:
             ten_million = int(number / 10**7)
@@ -41,24 +42,18 @@ class StockForDB:
 
 
     # 실시간(가장 최근에 저장된 데이터 기준) 등락률을 리턴 
-    def get_top(self, stock_type, desc=False):
+    def get_fluctuation_stock(self, stock_type='Kospi', desc=False):
+
+        if desc == False:
+            desc_or_asc = "Top"
+        else:
+            desc_or_asc = "Bottom"
+
         # 커서 생성
         cur = self.conn.cursor(cursor_factory=RealDictCursor)
         
-        if desc == True:
-            asc_or_desc = "DESC"
-        else:
-            asc_or_desc = "ASC"
-        # 쿼리문
         query = f"""
-        select T1.종목명, T1.종가 as 현재가, T1.등락률, T1.시가총액, 
-        T1.거래량, T1.거래대금, T1.기준일
-        from stock_info T1
-        LEFT JOIN public.stock_symbols T2
-            ON T1.종목코드 = T2.종목코드
-        WHERE T2.시장구분= '{stock_type}'
-        ORDER BY T1.기준일 DESC, 등락률 {asc_or_desc}
-        LIMIT 5
+            SELECT * fROM public."{stock_type}_fluctuationRate_{desc_or_asc}5"
         """
 
         # 쿼리 실행
@@ -69,7 +64,7 @@ class StockForDB:
 
         df = pd.DataFrame(cur.fetchall())
 
-        
+        # 화면에 보여주기 좋은 format으로 변경
         df['현재가'] = df["현재가"].apply(lambda x : format(x, ','))
         df['거래량'] = df["거래량"].apply(lambda x : format(x, ','))
 
@@ -81,5 +76,3 @@ class StockForDB:
 
         return df
     
-# a = StockForDB()
-# print(a.get_top("KOSPI"))
