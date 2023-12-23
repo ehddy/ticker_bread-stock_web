@@ -14,16 +14,18 @@ def treemap():
     f"postgresql://{_cfg['POSTGRES_USER']}:{_cfg['POSTGRES_PASSWORD']}@{_cfg['POSTGRES_HOST']}:{'5432'}/{_cfg['POSTGRES_DB']}"
 )
     qry = """
-    SELECT 종목코드 종목코드,
+    SELECT 종목코드,
         종목명 종목명,
-        시장구분 시장구분,
-        섹터 섹터,
-        업종명 업종명,
-        시가총액 시가총액,
-        거래량 거래량,
-        거래대금 거래량
-        --WHERE T2.섹터 IS NOT NULL
-        --LIMIT 50
+        시장구분,
+        섹터,
+        업종명,
+        시가총액,
+        거래량,
+        거래대금
+    FROM
+    stock_info
+    Where 
+    섹터 is Not Null
     """
 
     df = pd.read_sql(qry, con=engine)
