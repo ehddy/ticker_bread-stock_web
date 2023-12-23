@@ -19,14 +19,14 @@
                 <h3 class="card-title"><img class="" src="static/img/korea.png" style="height: 20px;"> 코스피
                     <small>KOSPI</small>
                 </h3>
-                <div class="box-tools float-end"><span class="label label-default">2023/11/03</span></div>
+                <div class="box-tools float-end"><span class="label label-default">{{ recent_date}}</span></div>
             </div>
             <div class="card-body">
                 <div class="market-price">
                     <span class="up-or-down" "font-size: 18px;">
-                        782.05
+                        {{ kospi[0] }}
                         <i class="target-icon"></i>
-                        (<span class="percent-change">1.19%</span>, 9.21)
+                        (<span class="percent-change">{{ kospi[1]}}</span>, {{ kospi[2]}})
                         <span class="float-end">
                             <span class="badge badge-danger up-down">상승:1237</span>&nbsp;
                             <span class="badge badge-primary up-down">하락:317</span>
@@ -43,14 +43,14 @@
                 <h3 class="card-title"><img class="" src="static/img/korea.png" style="height: 20px;"> 코스닥
                     <small>KOSDAQ</small>
                 </h3>
-                <div class="box-tools float-end"><span class="label label-default">2023/11/03</span></div>
+                <div class="box-tools float-end"><span class="label label-default">{{ recent_date }}</span></div>
             </div>
             <div class="card-body">
                 <div class="market-price">
                     <span class="up-or-down" "font-size: 18px;">
-                        -329
+                        {{ kosdaq[0] }}
                         <i class="target-icon"></i>
-                        (<span class="percent-change">-1.19%</span>, 9.21)
+                        (<span class="percent-change">{{ kosdaq[1] }}</span>, {{ kosdaq[2] }})
                         <span class="float-end">
                             <span class="badge badge-danger up-down">상승:1237</span>&nbsp;
                             <span class="badge badge-primary up-down">하락:317</span>
@@ -62,8 +62,21 @@
     </div>
 
     <div class="col-md-12 mt-3">
-        <div class="card" style="height: 600px;">
+        <div class="card" style="height: 700px;">
             <div class="card-body">
+                <!-- Dropdown for selecting filter -->
+                <div class="mb-3">
+                    <label for="filterDropdown" class="form-label">Select Filter:</label>
+                    <select id="filterDropdown" class="form-select">
+                        <!-- {% for option in dropdown_options %}
+                        <option value="{{ option.value }}">{{ option.label }}</option>
+                        {% endfor %} -->
+                    </select>
+
+
+                    <!-- Treemap container -->
+                    <div id="graph_tree" class="graph_tree"></div>
+                </div>
 
             </div>
         </div>
@@ -85,22 +98,26 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graph_tree = {{ graph_tree | safe }};
+    Plotly.plot('graph_tree', graph_tree);
+</script>
 <script>
     // JavaScript 코드
     const priceSpans = document.querySelectorAll(".up-or-down");
-    const target = document.querySelectorAll('.percent-change');
+    const targetSpans = document.querySelectorAll('.percent-change');
     const targetIcons = document.querySelectorAll('.target-icon')
     for (let i = 0; i < priceSpans.length; i++) {
-        const price = parseFloat(priceSpans[i].textContent);
+        const target = targetSpans[i].textContent;
 
-        if (price > 0) {
-            target[i].classList.add('color-up');
+        if (target[0] != "-") {
+            targetSpans[i].classList.add('color-up');
             targetIcons[i].classList.add('fas');
             targetIcons[i].classList.add('fa-caret-up');
             targetIcons[i].classList.add('color-up');
-        } else if (price < 0) {
-            target[i].classList.add('color-down');
+        } else {
+            targetSpans[i].classList.add('color-down');
             targetIcons[i].classList.add('fas');
             targetIcons[i].classList.add('fa-caret-down');
             targetIcons[i].classList.add('color-down');

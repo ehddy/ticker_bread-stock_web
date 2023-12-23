@@ -1,5 +1,6 @@
 *.db
 *.pyc
 *.csv
+*.yml
 __pycache__
 migrations

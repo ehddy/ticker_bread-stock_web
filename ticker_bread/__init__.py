@@ -25,4 +25,8 @@ def create_app():
     # from .filter import format_datetime
     # app.jinja_env.filters['datetime'] = format_datetime
 
+    # # Dash 애플리케이션 초기화
+    # from ticker_bread import init_dash_app
+    # init_dash_app(app)
+
     return app
