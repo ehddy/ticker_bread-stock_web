@@ -10,20 +10,6 @@ from bs4 import BeautifulSoup as bs
 class Indicators:
     def __init__(self, symbol):
         self.symbol = symbol
-        with open('../../../config/db_info.yml', encoding='UTF-8') as f:
-            _cfg = yaml.load(f, Loader=yaml.FullLoader)
-
-        # PostgreSQL 연결 정보
-        self.conn_info = {
-            "host": _cfg['POSTGRES_HOST'],
-            "database": _cfg['POSTGRES_DB'],
-            "port":"5432",
-            "user": _cfg['POSTGRES_USER'],
-            "password": _cfg['POSTGRES_PASSWORD']
-        }
-
-        # PostgreSQL 연결
-        self.conn = psycopg2.connect(**self.conn_info)
         self.recent_date = self.get_recent_date()
         self.data = self.get_data()
 
@@ -46,38 +32,48 @@ class Indicators:
         df['Change'] = df['Close'].pct_change(fill_method=None)
         return df
 
-    # 최근 장 마감일 기준 값, 증감률, 증감액 가져오기
+    # 1. 최근 장 마감일 기준 값, 증감률, 증감액 가져오기
     def get_recent_data(self):
         recent_data = self.data.iloc[-1][['Close', 'Change', 'ChangeAmount']].to_frame().T
         recent_data['Change'] = recent_data['Change'].apply(lambda x: str(round(x * 100, 2)) + '%')
         recent_data['ChangeAmount'] = recent_data['ChangeAmount'].apply(lambda x: str(round(x*-1, 2)) if str(x)[0] == '-' else str(round(x, 2)))
         return recent_data
 
-    # 시계열 데이터프레임 리턴 (시작 날짜, 빈도 지정) - 장기적 추세 / 다양한 시간 단위 분석
+    # 2. 시계열 데이터프레임 리턴 (시작 날짜, 빈도 지정) - 장기적 추세 / 다양한 시간 단위 분석
     def get_index_data_over_time(self, start_date, freq='D'): # 'D'(일별), 'W'(주별), 'M'(월별), 'Y'(연별) 
         df = fdr.DataReader(self.symbol, start_date, self.recent_date)
         df = df.asfreq(freq, method='pad')
         return df[['Close']]
     
-    # 최근 30일간의 데이터 가져오기 - 단기 추세 분석 / 최근 주가 변동 확인
+    # 3. 최근 30일간의 데이터 가져오기 - 단기 추세 분석 / 최근 주가 변동 확인
     def get_last_30_days_data(self):
         start_date = (datetime.strptime(self.recent_date, "%Y/%m/%d") - timedelta(days=30)).strftime("%Y-%m-%d")
         last_30_days_data = self.data.loc[start_date:self.recent_date]['Close']
         return last_30_days_data
 
-    # 코스피, 코스닥 상승 종목 수, 하락 종목 수 호출
+    # 4. 코스피, 코스닥 상승 종목 수, 하락 종목 수 호출
     def get_up_down_count(self, index):
-        cur = self.conn.cursor()
+        # 전체 종목 리스트 가져오기
+        total_list = fdr.StockListing('KRX')
 
-        # stock_info 테이블에서 KOSPI/KOSDAQ 등락률 파악 (기준일=recent_date일 때)
-        cur.execute(f"""
-            SELECT COUNT(*) FILTER (WHERE 등락률 > 0) AS up_count,
-                COUNT(*) FILTER (WHERE 등락률 < 0) AS down_count
-            FROM stock_info
-            WHERE 시장구분 = '{index}' AND TO_CHAR(기준일, 'YYYY-MM-DD') = '{self.recent_date.replace("/", "-")}'
-        """)
+        # 코스피, 코스닥 종목 코드 리스트 가져오기
+        if index.lower() == 'kospi':
+            index_list = total_list[total_list['Market'] == 'KOSPI']['Code'].tolist()
+        elif index.lower() == 'kosdaq':
+            index_list = total_list[total_list['Market'] == 'KOSDAQ']['Code'].tolist()
 
-        up_count, down_count = cur.fetchone()
+        # 각 종목의 마지막 날 데이터 가져오기
+        up_count = 0
+        down_count = 0
+        for Code in index_list:
+            try:
+                data = fdr.DataReader(Code, end=self.recent_date)
+                if data.iloc[-1]['Change'] > 0:
+                    up_count += 1
+                elif data.iloc[-1]['Change'] < 0:
+                    down_count += 1
+            except:
+                continue
 
         result = pd.DataFrame({
             '상승 종목 수': [up_count],
@@ -86,25 +82,45 @@ class Indicators:
 
         return result
 
+
+# 거래소별 종목코드 : StockListing()
+# 한국거래소 : KRX(KOSPI, KOSDAQ, KONEX)
+# 미국거래소 : NASDAQ, NYSE, AMEX, S&P500
+
+# 가격데이터 - DataReader() 
 # symbols : 
-# 코스피: KS11
-# 코스닥: KQ11
-# 나스닥 종합: IXIC
-# S&P500: SPY (S&P 500 ETF) **확인 필요 (단위)
-# 다우존스: DJI
-# 나스닥100: NDX
-# 환율 (달러/원): USD/KRW
+# 지수
+# 코스피지수 : KS11
+# 코스닥지수 : KQ11
+# 다우지수 : DJI
+# 나스닥지수 : IXIC
+# S&P500 : US500
+
+# 환율
+# 달러/원 : USD/KRW
+# 엔화/원 : JPY/KRW
+# 위엔/원 : CNY/KRW
+# 달러/유로 : USD/EUR
+# 달러/엔화 : USD/JPY
+
 # 금: GC=F (Comex 금)
 # 원자재: ^CRB (CRB 원자재 지수)
-# 엔화 (엔/원): JPY/KRW **확인 필요 (단위)
 # 유가: CL=F (WTI 원유)
 
-# Indicators = Indicators('KS11') 
+# 암호화폐
+# 비트코인 달러가격(비트파이넥스): BTC/USD 
+# 비트코인 원화가격(빗썸): BTC/KRW
 
-# recent_data = indicators.get_recent_data()
-# df = indicators.get_index_data_over_time('2020-01-01', 'D')
-# last_30_days_data = indicators.get_last_30_days_data()
-# up_down_count = indicators.get_up_down_count('KOSPI')
+# Indicators = Indicators('JPY/KRW') 
+
+# recent_data = Indicators.get_recent_data()
+# df = Indicators.get_index_data_over_time('2020-01-01', 'D')
+# last_30_days_data = Indicators.get_last_30_days_data()
+# up_down_count = Indicators.get_up_down_count('kospi')
+
+# kospi_listing = fdr.StockListing('KOSPI')
+# 모든 열 이름 출력
+# print(kospi_listing.columns)
 
 # print(recent_data)
 # print(last_30_days_data)
