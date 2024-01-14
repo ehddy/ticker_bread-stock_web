@@ -82,39 +82,10 @@ class Indicators:
 
         return result
 
-
-# 거래소별 종목코드 : StockListing()
-# 한국거래소 : KRX(KOSPI, KOSDAQ, KONEX)
-# 미국거래소 : NASDAQ, NYSE, AMEX, S&P500
-
-# 가격데이터 - DataReader() 
-# symbols : 
-# 지수
-# 코스피지수 : KS11
-# 코스닥지수 : KQ11
-# 다우지수 : DJI
-# 나스닥지수 : IXIC
-# S&P500 : US500
-
-# 환율
-# 달러/원 : USD/KRW
-# 엔화/원 : JPY/KRW
-# 위엔/원 : CNY/KRW
-# 달러/유로 : USD/EUR
-# 달러/엔화 : USD/JPY
-
-# 금: GC=F (Comex 금)
-# 원자재: ^CRB (CRB 원자재 지수)
-# 유가: CL=F (WTI 원유)
-
-# 암호화폐
-# 비트코인 달러가격(비트파이넥스): BTC/USD 
-# 비트코인 원화가격(빗썸): BTC/KRW
-
 # Indicators = Indicators('JPY/KRW') 
 
 # recent_data = Indicators.get_recent_data()
-# df = Indicators.get_index_data_over_time('2020-01-01', 'D')
+# data_over_time = Indicators.get_index_data_over_time('2020-01-01', 'M')
 # last_30_days_data = Indicators.get_last_30_days_data()
 # up_down_count = Indicators.get_up_down_count('kospi')
 
@@ -123,5 +94,6 @@ class Indicators:
 # print(kospi_listing.columns)
 
 # print(recent_data)
+# print(data_over_time)
 # print(last_30_days_data)
 # print(up_down_count)
