@@ -4,7 +4,7 @@ from pykrx import stock
 import pandas_datareader.data as pdr
 import yfinance as yf
 
-# 라이브러리를 통해 주가 정볼르 가져오는 Class 모음(여러 라이브러리를 비교해보고 제일 성능이 좋은 라이브러리 1개를 선택해야 함)
+# 라이브러리를 통해 주가 정보를 가져오는 Class 모음(여러 라이브러리를 비교해보고 제일 성능이 좋은 라이브러리 1개를 선택해야 함)
 class StockForLibrary:
     
     """
